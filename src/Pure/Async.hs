@@ -1,5 +1,5 @@
 {-# LANGUAGE MagicHash, ScopedTypeVariables, AllowAmbiguousTypes, TypeApplications, RecordWildCards #-}
-module Pure.Async (async, asyncOnce, asyncOnceAs) where
+module Pure.Async (async, asyncAs, asyncOnce, asyncOnceAs) where
 
 import Pure.Data.Default
 import Pure.Data.View
@@ -46,6 +46,16 @@ async_ = LibraryComponentIO $ \self ->
 async :: IO () -> View -> View
 async action view = async_ (Async action view False :: Async ())
 
+-- | Execute the given action asynchronously before the given View is first
+-- rendered. Requires a visible type application for some hairy situations
+-- that require special-case diffing of async views.
+--
+-- Use as:
+--
+-- > asyncAs @SomeType someIOAction someView
+--
+asyncAs :: forall a. Typeable a => IO () -> View -> View
+asyncAs action view = async_ (Async action view False :: Async a)
 
 -- | Execute the given action asynchronously before the given View is first
 -- rendered.
