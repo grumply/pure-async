@@ -18,7 +18,7 @@ data Async a = Async
   }
 
 async_ :: Typeable a => Async a -> View
-async_ = LibraryComponentIO $ \self ->
+async_ = Component $ \self ->
   def
     { construct = do
         Async {..} <- ask self
@@ -43,6 +43,12 @@ async_ = LibraryComponentIO $ \self ->
 --
 -- > async someIOAction someView
 --
+-- Note: If the supplied action is updated, the thread running the original 
+-- action will be killed. Be sure to guard the action as necessary fro your 
+-- use-case.
+--
+-- Note: The asynchronous action will be killed via `killThread` when the
+-- view is unmounted.
 async :: IO () -> View -> View
 async action view = async_ (Async action view False :: Async ())
 
@@ -54,6 +60,12 @@ async action view = async_ (Async action view False :: Async ())
 --
 -- > asyncAs @SomeType someIOAction someView
 --
+-- Note: If the supplied action is updated, the thread running the original 
+-- action will be killed. Be sure to guard the action as necessary fro your 
+-- use-case.
+--
+-- Note: The asynchronous action will be killed via `killThread` when the
+-- view is unmounted.
 asyncAs :: forall a. Typeable a => IO () -> View -> View
 asyncAs action view = async_ (Async action view False :: Async a)
 
@@ -64,6 +76,12 @@ asyncAs action view = async_ (Async action view False :: Async a)
 --
 -- > asyncOnce someIOAction someView
 --
+-- Note: If the supplied action is updated, the thread running the original 
+-- action will be killed. Be sure to guard the action as necessary fro your 
+-- use-case.
+--
+-- Note: The asynchronous action will be killed via `killThread` when the
+-- view is unmounted.
 asyncOnce :: IO () -> View -> View
 asyncOnce = asyncOnceAs @()
 
@@ -75,5 +93,7 @@ asyncOnce = asyncOnceAs @()
 --
 -- > asyncOnceAs @SomeType someIOAction someView
 --
+-- Note: The asynchronous action will be killed via `killThread` when the
+-- view is unmounted.
 asyncOnceAs :: forall a. Typeable a => IO () -> View -> View
 asyncOnceAs action view = async_ (Async action view True :: Async a)
