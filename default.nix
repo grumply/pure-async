@@ -1,10 +1,10 @@
-{ mkDerivation, base, pure-core, pure-default, stdenv }:
+{ mkDerivation, base, pure-elm, stdenv }:
 mkDerivation {
   pname = "pure-async";
   version = "0.8.0.0";
   src = ./.;
-  libraryHaskellDepends = [ base pure-core pure-default ];
+  libraryHaskellDepends = [ base pure-elm ];
   homepage = "github.com/grumply/pure-async";
-  description = "Async decorator";
+  description = "";
   license = stdenv.lib.licenses.bsd3;
 }
