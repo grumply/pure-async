@@ -36,8 +36,8 @@ requests are purified from IO.
 eval :: IO b -> b
 eval = unsafePerformIO 
 
-async :: forall a. Typeable a => (a -> View) -> a -> View
-async f x = foldM (\x _ -> pure (x :: Maybe a)) (command (Just x) >> pure (Nothing,pure ())) (maybe Null f it)
+async :: View -> View
+async x = foldM (\x _ -> pure (x :: Maybe View)) (command (Just x) >> pure (Nothing,pure ())) (maybe Null id it)
 
 -- | `suspense` can help to make certain `eval`-based code safer by imposing a 
 -- thread barrier on a set of asyncronous computations. The intention is to 
