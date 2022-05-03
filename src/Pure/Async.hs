@@ -1,7 +1,7 @@
 {-# language PatternSynonyms, BlockArguments, LambdaCase, ScopedTypeVariables, FlexibleContexts #-}
 module Pure.Async where
 
-import Pure.Elm.Fold (Elm,View,Time,loop,continue,fold,foldM,it,command,delay,pattern Microseconds,pattern Null)
+import Pure.Elm.Fold (Elm,View,Time,rec,self,fold,foldM,it,command,delay,pattern Microseconds,pattern Null)
 
 import Control.Concurrent (forkIO,killThread,newEmptyMVar,tryPutMVar,takeMVar,putMVar)
 import Control.Exception (SomeException,evaluate,handle,throw)
@@ -91,15 +91,16 @@ suspense' tvs failure v_ =
       mv <- newEmptyMVar
 
       t1 <- forkIO do
-        loop tvs \case
-          [] -> do
-            x <- takeMVar mv
-            command x
-          (Microseconds us _,v):tvs -> do
-            mx <- timeout us (takeMVar mv)
-            case mx of
-              Nothing -> command v >> continue tvs
-              Just x  -> command x
+        flip fix tvs $ \k xs ->
+          case xs of
+            [] -> do
+              x <- takeMVar mv
+              command x
+            (Microseconds us _,v):tvs -> do
+              mx <- timeout us (takeMVar mv)
+              case mx of
+                Nothing -> command v >> k tvs
+                Just x  -> command x
 
       t2 <- forkIO do
         void do
